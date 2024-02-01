@@ -5,18 +5,22 @@ import { FaQuestionCircle, FaBook, FaCog, FaUser, FaMobileAlt, FaPhone, FaCommen
 import { AiOutlineCopyright, AiOutlineMail } from "react-icons/ai";
 import { FiLink } from "react-icons/fi";
 import { GiEarthAmerica } from "react-icons/gi";
+import { useUser } from "../context/UserContext";
+
+
 
 interface ChatLinkPageProps {
     chatLinkPage: string;
 }
 
 const Footer : React.FC<ChatLinkPageProps> = ({ chatLinkPage }) => {
+  const { user, logout } = useUser();
 
   return (
     <Flex p={10} align="center" justify="space-around" bg="#dddddd" as="footer" /* position="fixed" bottom="0" width="100%" left="0" */ height="200px" >
         <Flex align="center" justify="flex-start" gap={10} p={1}>
-          <Link as={RouterLink} to="/" >
-            <Button bgColor="darkred" p={7} ><Icon as={FaSignOutAlt} boxSize={8} mr={4} color="white" /><Text fontWeight="bold"  fontSize="2xl" color="white">Logout</Text></Button>
+          <Link as={RouterLink} to="/login" >
+            <Button bgColor="darkred" p={7} onClick={logout}><Icon as={FaSignOutAlt} boxSize={8} mr={4} color="white" /><Text fontWeight="bold"  fontSize="2xl" color="white">Logout</Text></Button>
           </Link>
         </Flex>
         <Flex align="center" justify="flex-end" gap={10} p={1}>

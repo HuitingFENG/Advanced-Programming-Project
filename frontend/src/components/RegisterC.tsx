@@ -1,26 +1,30 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate, Link, useLocation  } from 'react-router-dom';
-import { Button, Input, VStack, useToast } from '@chakra-ui/react';
-import { FaUserPlus } from "react-icons/fa";
+import { Button, Input, VStack, useToast, InputGroup,InputRightElement,IconButton } from '@chakra-ui/react';
+import { FaUserPlus, FaEye, FaEyeSlash  } from "react-icons/fa";
+
+
+
 
 
 const RegisterC = () => {
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const toast = useToast();
     const navigate = useNavigate();
-    // const { tempId, setTempId } = useTempId();
-    // const clearTempId = () => setTempId(null);
-    // const [ newUserId, setNewUserId ] = useState();
     const location = useLocation();
-    const navigatedTempId = location.state?.tempId;
+    const [promotion, setPromotion] = useState('');
+
+
 
 
 
 
     const sendUser = () => {
-        if (!name.trim() || !email.trim() || !password.trim()) {
+        if (!lastName.trim() || !firstName.trim() || !email.trim() || !password.trim()) {
             toast({
                 title: 'Erreur',
                 description: 'Veuillez remplir tous les champs.',
@@ -32,12 +36,12 @@ const RegisterC = () => {
         }
 
 
-        fetch('http://localhost:3001/api/users/signup', {
+        fetch(`${process.env.REACT_APP_BACKENDNODE_URL}/api/user/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name, email, password }),
+            body: JSON.stringify({ firstName, lastName, email, password, promotion }),
         })
         .then(response => {
             console.log("TEST response: ", response);
@@ -54,7 +58,8 @@ const RegisterC = () => {
                 duration: 1000,
                 isClosable: true,
             });
-            setName('');
+            setFirstName('');
+            setLastName('');
             setEmail('');
             setPassword('');
             setTimeout(() => {
@@ -85,20 +90,28 @@ const RegisterC = () => {
             as="form"
             onSubmit={handleSubmit}
             width="50%"
-            bgColor="#f8f8f8" // Changed to a lighter and softer background color
-            border="2px" // Thinner border for a more elegant look
+            bgColor="#f8f8f8"
+            border="2px"
             borderColor="#0C2340"
-            borderRadius="lg" // Added border radius for rounded corners
-            boxShadow="sm" // Subtle shadow for depth
-            p={6} // Adjusted padding for better spacing
+            borderRadius="lg" 
+            boxShadow="sm" 
+            p={6} 
         >
             <Input 
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                borderColor="#cccccc" // Softened border color
-                _hover={{ borderColor: "#0C2340" }} // Change border color on hover
-                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }} // Focus effect
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                borderColor="#cccccc" 
+                _hover={{ borderColor: "#0C2340" }} 
+                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }} 
+            />
+            <Input 
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                borderColor="#cccccc" 
+                _hover={{ borderColor: "#0C2340" }} 
+                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }} 
             />
             <Input 
                 placeholder="Email"
@@ -109,29 +122,52 @@ const RegisterC = () => {
                 _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
             />
             <Input 
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Promotion (Optional for students)"
+                value={promotion}
+                onChange={(e) => setPromotion(e.target.value)}
                 borderColor="#cccccc"
                 _hover={{ borderColor: "#0C2340" }}
-                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
+                _focus={{ borderColor: "#0C2340", boxShadow: "outline"}}
             />
+
+
+            <InputGroup>
+                <Input
+                    placeholder="Password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    borderColor="#cccccc"
+                    _hover={{ borderColor: "#0C2340" }}
+                    _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
+                />
+                <InputRightElement>
+                    <IconButton
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    icon={showPassword ? <FaEyeSlash /> : <FaEye />}
+                    size="sm"
+                    onClick={() => setShowPassword(!showPassword)}
+                    variant="ghost"
+                    />
+                </InputRightElement>
+            </InputGroup>
+
+
             <Button
                 colorScheme="blue"
                 type="submit"
                 leftIcon={<FaUserPlus />}
-                bgColor="#0C2340" // Changed button color
-                color="white" // Text color for contrast
-                _hover={{ bgColor: "#003153" }} // Hover effect
+                bgColor="#0C2340" 
+                color="white" 
+                _hover={{ bgColor: "#003153" }} 
             >
                 Register
             </Button>
             <Link to="/login">
                 <Button
-                    bgColor="#f2f2f2" // Lighter color for the secondary button
+                    bgColor="#f2f2f2"
                     color="#0C2340" 
-                    _hover={{ bgColor: "#e2e2e2" }} // Hover effect
+                    _hover={{ bgColor: "#e2e2e2" }} 
                     leftIcon={<FaUserPlus />}
                 >
                     Login

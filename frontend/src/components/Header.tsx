@@ -2,26 +2,34 @@ import React from "react";
 import { Box,Flex,Link,Text,Image,Button,Stack,Center,Icon } from "@chakra-ui/react";
 import {Link as RouterLink, BrowserRouter as Router, Routes, Route, } from "react-router-dom";
 import { FaQuestionCircle, FaBook, FaCog, FaUser, FaChartBar, FaRegLightbulb, FaUserPlus, FaSignInAlt, FaFileUpload, FaHandshake, FaClipboardList, FaCheckCircle } from "react-icons/fa";
+import { useUser } from "../context/UserContext";
 
 interface HeaderProps {
-  userName: string;
-  userEmail: string;
+  userFirstName: string | undefined;
+  userLastName: string | undefined;
+  userEmail: string | undefined;
   message: string;
 }
 
 
-const Header: React.FC<HeaderProps> = ({userName, userEmail, message}) => {
+
+const Header: React.FC<HeaderProps> = ({userFirstName, userLastName, userEmail, message}) => {
+  // const user = useUser();
+
 
   return (
     <Flex justify="space-between"  flexDir="column" width="100%" height="300px">
         
         <Flex flexDir="row"  bg="#0C2340" align="center"  justify="space-between" height="200px" p={4} >
           <Flex align="center" justify="space-between" gap={10} p={1}>
-              <Link as={RouterLink} to="/">
+              {/* <Link as={RouterLink} to="/"> */}
                   <Image src="../../../assets/efrei.png" alt="icon" width="400px" />
-              </Link>
+              {/* </Link> */}
           </Flex>
-          <Flex align="center" gap={10} mr={4}>
+          <Flex>
+            <Text fontWeight="bold" fontSize="5xl" color="white">INTERNSHIP MANAGEMENT SYSTEM</Text>
+          </Flex>
+          {/* <Flex align="center" gap={10} mr={4}>
               <Link as={RouterLink} to="/">
                 <Flex align="center">
                   <Icon as={FaFileUpload} boxSize={6} mr={2} color="white" />
@@ -46,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({userName, userEmail, message}) => {
                   <Text fontWeight="bold" fontSize="xl" color="white">Report Validation</Text>
                 </Flex>
               </Link>
-          </Flex>
+          </Flex> */}
         </Flex>
 
         <Flex flexDir="column" justify="flex-start"  mt={-300} p={3} gap={2}>
@@ -62,7 +70,7 @@ const Header: React.FC<HeaderProps> = ({userName, userEmail, message}) => {
               height="50px" 
               padding="30px"
             >
-              <Text fontSize="xl" fontWeight="bold">{userName}</Text>
+              <Text fontSize="md" fontWeight="bold">{userFirstName} {userLastName}</Text>
             </Box>
             <Text fontSize="xl" fontWeight="bold" mb={-15} color="green" p={2} >{message}</Text>
           </Flex>

@@ -5,45 +5,73 @@ interface UserProviderProps {
     children: ReactNode;
 }
 
-interface UserData {
-    userId: number;
-    tempId: string;
-    name: string;
-    email: string;
-    password: string;
-}
+
+interface User {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  // password: string;
+  type: string;
+  telephone: string;
+  // oldPassword: string;
+  promotion: number;
+  year: string;
+  company: {
+      name: string;
+      address: string;
+      city: string;
+      zipCode: string;
+  };
+};
 
 interface UserContextType {
-    user: UserData | null;
-    login: (userData: UserData) => void;
+    // id(id: any): unknown;
+    user: User | null;
+    login: (User: User) => void;
     logout: () => void;
-  }
+}
 
 
 const UserContext = createContext<UserContextType | null>(null);
-export const useUser = () => useContext(UserContext);
-
-
 
 
 export const UserProvider = ({ children }: UserProviderProps) => {
-//   const [user, setUser] = useState(null); // null when not logged in
-  // const [user, setUser] = useState<UserData | null>(null);
-  const [user, setUser] = useState<UserData | null>(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
 
-  const login = (userData: UserData) => {
-    console.log("Logging in user:", userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData); // Set user data upon login
+  useEffect(() => {
+ 
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKENDNODE_URL}/api/user`);
+        const userData: User = await response.json();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  const login = (User: User) => {
+    console.log("Logging in user:", User);
+    localStorage.setItem('user', JSON.stringify(User));
+    setUser(User); 
   };
 
   const logout = () => {
     console.log("Logging out user");
     localStorage.removeItem('user'); 
-    setUser(null); // Clear user data upon logout
+    setUser(null); 
   };
 
   const contextValue: UserContextType = {
@@ -59,3 +87,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     </UserContext.Provider>
   );
 };
+
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === null) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
+};
+

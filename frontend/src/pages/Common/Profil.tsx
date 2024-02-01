@@ -3,6 +3,7 @@ import { Flex } from "@chakra-ui/react";
 import ProfilHeader from '../../components/ProfilHeader';
 import ProfilFooter from '../../components/ProfilFooter';
 import LoginC from '../../components/LoginC';
+import RegisterC from '../../components/RegisterC';
 
 const Profil: React.FC = () => {
     return (
@@ -18,6 +19,8 @@ const Profil: React.FC = () => {
           overflowY="auto" 
           paddingBottom="250px"
         >
+          {/* <LoginC /> */}
+          {/* <RegisterC /> */}
         </Flex>
       </Flex>
     );

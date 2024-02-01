@@ -1,28 +1,40 @@
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const loginRouter = require('./routes/login');
+const port = 3001;
+const db_connection = require('./config/db_connection');
+const sequelize = require('./config/sequelize');
 
 const app = express();
-const port = 3001;
-
-const { Sequelize } = require('sequelize');
-
-const sequelize = new Sequelize('mysql://root:root123@localhost:3306/internship_system'); // replace with your connection string
+app.use(express.json());
+app.use(cors());
 
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-});
+const userRoutes = require('./routes/userRoutes');
+const internshipRoutes = require('./routes/internshipRoutes');
 
-app.get('/test-db', (req, res) => {
-  sequelize.authenticate()
-    .then(() => res.send('Database connection has been established successfully.'))
-    .catch(err => res.send('Unable to connect to the database:', err));
-});
+
+const User = require('./models/user');
+const Internship = require('./models/internship');
+// Define associations
+User.hasMany(Internship, { foreignKey: 'studentID' });
+Internship.belongsTo(User, { foreignKey: 'studentID', as: 'student' });
+User.hasMany(Internship, { foreignKey: 'tutorID' });
+Internship.belongsTo(User, { foreignKey: 'tutorID', as: 'tutor' });
+
+
+
+
+
+app.use('/api/user', userRoutes); 
+app.use('/api/internship', internshipRoutes); 
+
+
+sequelize.sync(/* { force: true } */)
+  .then(() => console.log('Tables have been successfully created, if they were not existing before'))
+  .catch(error => console.error('This error occured', error));
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)
 });
 
-app.use(cors());

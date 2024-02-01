@@ -1,6 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, VStack, Divider, Input, Button, InputGroup, InputRightElement, Text, Stack, Flex } from "@chakra-ui/react";
 import { ArrowForwardIcon } from '@chakra-ui/icons';
+
+
+
+
+
+
+interface User {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  type: string;
+  telephone: string;
+  oldPassword: string;
+  promotion: number;
+  year: string;
+  company: {
+      name: string;
+      address: string;
+      city: string;
+      zipCode: string;
+  };
+};
+
+
+
+
+
 
 const TutorChatC = () => {
   const [selectedUser, setSelectedUser] = useState('Admin');
@@ -11,6 +40,18 @@ const TutorChatC = () => {
     { sender: 'Tutor', text: 'Blablabla...' }
   ]);
   const [newMessage, setNewMessage] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        console.log("TEST user.promotion: ", `${user?.promotion}`);
+        console.log("User ID from localStorage:", JSON.parse(storedUser)?.id);
+    };
+  }, []);
+
+
 
   const handleSendMessage = () => {
     setMessages([...messages, { sender: 'You', text: newMessage }]);
@@ -48,12 +89,6 @@ const TutorChatC = () => {
           height='400px'
           overflowY='auto'
         >
-          {/* {messages.map((message, index) => (
-            <Box key={index} bg={message.sender === 'Admin' ? 'blue.100' : 'green.100'} p={2} borderRadius='md'>
-              <Text fontWeight='bold'>{message.sender}:</Text>
-              <Text>{message.text}</Text>
-            </Box>
-          ))} */}
             {messages.map((message, index) => (
             <Flex
                 key={index}

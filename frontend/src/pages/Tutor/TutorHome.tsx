@@ -1,18 +1,58 @@
-import React, {useState}  from 'react';
+import React, {useEffect, useState}  from 'react';
 import Header from '../../components/Header';
 import { Flex,Link,Text,Button } from "@chakra-ui/react";
 import {Link as RouterLink, BrowserRouter as Router, } from "react-router-dom";
 import Footer from '../../components/Footer';
+import { useUser } from '../../context/UserContext';
+
+
+
+
+
+
+
+interface User {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  type: string;
+  telephone: string;
+  oldPassword: string;
+  promotion: number;
+  year: string;
+  company: {
+      name: string;
+      address: string;
+      city: string;
+      zipCode: string;
+  };
+};
+
+
 
 const TutorHome: React.FC = () => {
   const [chatLinkPage, setChatLinkPage] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        console.log("TEST user.promotion: ", `${user?.promotion}`);
+        console.log("User ID from localStorage:", JSON.parse(storedUser)?.id);
+    };
+  }, []);
+
+
 
   return (
     <Flex
       direction="column"
       minHeight="100vh"
     >
-      <Header userName="tutor" userEmail="tutor@efrei.com" message="!!! The intermediate evaluation form should be filled before 12/31/2023 00:00:00." />
+      <Header userFirstName={user?.firstName} userLastName={user?.lastName} userEmail={user?.email} message="" /* message="!!! The intermediate evaluation form should be filled before 12/31/2023 00:00:00." */ />
 
       <Flex
         direction="column"
@@ -29,7 +69,7 @@ const TutorHome: React.FC = () => {
 
           <Flex gap={10} justify="space-even" flexDir="row" >
               <Link as={RouterLink} to="/reset"><Button p={8} bgColor="#0C2340" color="white" ><Text fontSize="3xl" fontWeight="bold">RESET PASSWORD</Text></Button></Link>
-              <Link as={RouterLink} to="/tutor/viewallfiles"><Button p={8} bgColor="#0C2340" color="white" ><Text fontSize="3xl" fontWeight="bold">VIEW ALL FILES</Text></Button></Link>
+              {/* <Link as={RouterLink} to="/tutor/viewallfiles"><Button p={8} bgColor="#0C2340" color="white" ><Text fontSize="3xl" fontWeight="bold">VIEW ALL FILES</Text></Button></Link> */}
           </Flex>
 
           <Flex>
@@ -37,7 +77,7 @@ const TutorHome: React.FC = () => {
           </Flex>
           
           <Flex gap={10}>
-              <Link as={RouterLink} to="/tutor/manageallreports"><Button p={8} bgColor="#0C2340" color="white" ><Text fontSize="3xl" fontWeight="bold">MANAGE ALL REPORTS (VALIDATE / INVALIDATE)</Text></Button></Link>
+              <Link as={RouterLink} to="/tutor/manageallfiles"><Button p={8} bgColor="#0C2340" color="white" ><Text fontSize="3xl" fontWeight="bold">MANAGE ALL FILES (VALIDATE / INVALIDATE)</Text></Button></Link>
           </Flex>
       </Flex>
 

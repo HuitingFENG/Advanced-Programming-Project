@@ -1,81 +1,118 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, Link, useLocation  } from 'react-router-dom';
-import { Button, Input, VStack, useToast } from '@chakra-ui/react';
-import { FaUserPlus, FaRedo } from "react-icons/fa";
+import { Button, IconButton, Input, InputGroup, InputRightElement, VStack, useToast } from '@chakra-ui/react';
+import { FaUserPlus, FaRedo, FaEyeSlash, FaEye } from "react-icons/fa";
+
+
+interface User {
+    id?: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    type: string;
+    telephone: string;
+    oldPassword: string;
+    promotion: number;
+    year: string;
+    company: {
+        name: string;
+        address: string;
+        city: string;
+        zipCode: string;
+    };
+};
 
 
 const ResetC = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [user, setUser] = useState<User | null>(null);
     const toast = useToast();
-    const navigate = useNavigate();
-    // const { tempId, setTempId } = useTempId();
-    // const clearTempId = () => setTempId(null);
-    // const [ newUserId, setNewUserId ] = useState();
-    const location = useLocation();
-    const navigatedTempId = location.state?.tempId;
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+ 
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            console.log("User ID from localStorage:", JSON.parse(storedUser)?.id);
+        };
+    }, []);
 
 
-
-
-    const sendUser = () => {
-        if (!name.trim() || !email.trim() || !password.trim()) {
+    const resetPassword = () => {
+        // return ;
+        if (!currentPassword.trim() || !newPassword.trim()) {
             toast({
-                title: 'Erreur',
-                description: 'Veuillez remplir tous les champs.',
+                title: 'Error',
+                description: 'Please fill in all fields.',
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
             });
-            return; 
+            return;
         }
-
-
-        fetch('http://localhost:3001/api/users/signup', {
+           
+        if (!user) {
+            toast({
+                title: 'User not found',
+                description: 'Unable to reset password without user information.',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+    
+        fetch(`${process.env.REACT_APP_BACKENDNODE_URL}/api/user/resetPassword`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name, email, password }),
+            body: JSON.stringify({
+                userId: user.id,
+                currentPassword,
+                newPassword,
+            }),
         })
         .then(response => {
-            console.log("TEST response: ", response);
             if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) }); 
+                return response.text().then(text => {
+                    console.error("Server error response:", text); 
+                    throw new Error('Password reset failed. Please try again.'); 
+                });
             }
             return response.json();
         })
-        .then(data => {
+        .then(() => {
             toast({
-                title: 'Inscription réussie.',
-                description: 'Bienvenue chez nous !',
+                title: 'Password Reset Successful',
+                description: 'Your password has been updated.',
                 status: 'success',
-                duration: 1000,
+                duration: 5000,
                 isClosable: true,
             });
-            setName('');
-            setEmail('');
-            setPassword('');
-            setTimeout(() => {
-                navigate('/login'); 
-            }, 1000);
+            setCurrentPassword(''); 
+            setNewPassword('');
         })
-        .catch((error) => {
-            console.error('Error:', error);
+        .catch(error => {
             toast({
-                title: 'Inscription échouée.',
-                description: error.message,
+                title: 'Password Reset Failed',
+                description: error.toString(),
                 status: 'error',
-                duration: 1000,
+                duration: 5000,
                 isClosable: true,
             });
+            console.log("TEST Password Reset Failed: ", error.toString());
         });
     };
 
+
+
     const handleSubmit = (e: React.FormEvent<HTMLDivElement>) => {
         e.preventDefault(); 
-        sendUser();
+        resetPassword();
     };
 
     return (
@@ -85,62 +122,97 @@ const ResetC = () => {
             as="form"
             onSubmit={handleSubmit}
             width="50%"
-            bgColor="#f8f8f8" // Changed to a lighter and softer background color
-            border="2px" // Thinner border for a more elegant look
+            bgColor="#f8f8f8" 
+            border="2px" 
             borderColor="#0C2340"
-            borderRadius="lg" // Added border radius for rounded corners
-            boxShadow="sm" // Subtle shadow for depth
-            p={6} // Adjusted padding for better spacing
+            borderRadius="lg" 
+            boxShadow="sm" 
+            p={6} 
         >
             <Input 
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                borderColor="#cccccc" // Softened border color
-                _hover={{ borderColor: "#0C2340" }} // Change border color on hover
-                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }} // Focus effect
+                readOnly
+                placeholder="First Name"
+                value={user?.firstName}
+                borderColor="#cccccc" 
+                _hover={{ borderColor: "#0C2340" }} 
+                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }} 
+            />
+            <Input 
+                readOnly
+                placeholder="Last Name"
+                value={user?.lastName.toUpperCase()}
+                borderColor="#cccccc" 
+                _hover={{ borderColor: "#0C2340" }} 
+                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }} 
             />
             <Input 
                 placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={user?.email}
                 borderColor="#cccccc"
                 _hover={{ borderColor: "#0C2340" }}
                 _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
             />
-            <Input 
-                placeholder="Old password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                borderColor="#cccccc"
-                _hover={{ borderColor: "#0C2340" }}
-                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
-            />
-            <Input 
-                placeholder="New password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                borderColor="#cccccc"
-                _hover={{ borderColor: "#0C2340" }}
-                _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
-            />
+
+
+            <InputGroup>
+                <Input
+                    placeholder="Current Password"
+                    type={showPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    borderColor="#cccccc"
+                    _hover={{ borderColor: "#0C2340" }}
+                    _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
+                />
+                <InputRightElement>
+                    <IconButton
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    icon={showPassword ? <FaEyeSlash /> : <FaEye />}
+                    size="sm"
+                    onClick={() => setShowPassword(!showPassword)}
+                    variant="ghost"
+                    />
+                </InputRightElement>
+            </InputGroup>
+
+
+            <InputGroup>
+                <Input
+                    placeholder="New Password"
+                    type={showPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    borderColor="#cccccc"
+                    _hover={{ borderColor: "#0C2340" }}
+                    _focus={{ borderColor: "#0C2340", boxShadow: "outline" }}
+                />
+                <InputRightElement>
+                    <IconButton
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    icon={showPassword ? <FaEyeSlash /> : <FaEye />}
+                    size="sm"
+                    onClick={() => setShowPassword(!showPassword)}
+                    variant="ghost"
+                    />
+                </InputRightElement>
+            </InputGroup>
+
+
             <Button
                 colorScheme="blue"
                 type="submit"
                 leftIcon={<FaRedo />}
-                bgColor="#0C2340" // Changed button color
-                color="white" // Text color for contrast
-                _hover={{ bgColor: "#003153" }} // Hover effect
+                bgColor="#0C2340" 
+                color="white" 
+                _hover={{ bgColor: "#003153" }} 
             >
                 Reset
             </Button>
             <Link to="/login">
                 <Button
-                    bgColor="#f2f2f2" // Lighter color for the secondary button
+                    bgColor="#f2f2f2" 
                     color="#0C2340" 
-                    _hover={{ bgColor: "#e2e2e2" }} // Hover effect
+                    _hover={{ bgColor: "#e2e2e2" }} 
                     leftIcon={<FaUserPlus />}
                 >
                     Login

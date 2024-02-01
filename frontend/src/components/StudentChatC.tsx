@@ -1,8 +1,40 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, VStack, Divider, Input, Button, InputGroup, InputRightElement, Text, Stack, Flex } from "@chakra-ui/react";
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 
+
+
+
+
+interface User {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  type: string;
+  telephone: string;
+  oldPassword: string;
+  promotion: number;
+  year: string;
+  company: {
+      name: string;
+      address: string;
+      city: string;
+      zipCode: string;
+  };
+};
+
+
+
+
+
+
+
+
+
 const StudentChatC = () => {
+
   const [messages, setMessages] = useState([
     { sender: 'Tutor1', text: 'Blablabla...' },
     { sender: 'Student', text: 'Blablabla...' },
@@ -11,6 +43,18 @@ const StudentChatC = () => {
   ]);
 
   const [newMessage, setNewMessage] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        console.log("TEST user.promotion: ", `${user?.promotion}`);
+        console.log("User ID from localStorage:", JSON.parse(storedUser)?.id);
+    };
+  }, []);
+
+
 
   const handleSendMessage = () => {
     setMessages([...messages, { sender: 'You', text: newMessage }]);

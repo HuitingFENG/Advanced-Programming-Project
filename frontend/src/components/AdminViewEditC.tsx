@@ -1,9 +1,47 @@
 // AdminViewEditC
 
-import React from 'react';
+import React, { useEffect, useState,  } from 'react';
 import { Flex,FormControl,FormLabel,Input,Textarea,Select,Button,Heading,VStack,HStack,Box } from "@chakra-ui/react";
 
+
+
+interface User {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  type: string;
+  telephone: string;
+  oldPassword: string;
+  promotion: number;
+  year: string;
+  company: {
+      name: string;
+      address: string;
+      city: string;
+      zipCode: string;
+  };
+};
+
+
+
+
+
 const AdminViewEditC = () => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        console.log("TEST user.promotion: ", `${user?.promotion}`);
+        console.log("User ID from localStorage:", JSON.parse(storedUser)?.id);
+    };
+  }, []);
+
+
+
   return (
     <Flex direction="column" p={8} align="center" w="80%" justify="center">
       <Box w="full" p={5} borderWidth="1px" borderRadius="lg">
@@ -18,7 +56,6 @@ const AdminViewEditC = () => {
           <FormControl id="internship-subject">
             <FormLabel>INTERNSHIP SUBJECT:</FormLabel>
             <Select>
-    
               <option value="option1">Option 1</option>
             </Select>
           </FormControl>
@@ -27,7 +64,6 @@ const AdminViewEditC = () => {
             <FormLabel>PROMOTION:</FormLabel>
             <Select placeholder="Select promotion">
               <option value="2028">2028</option>
-      
             </Select>
           </FormControl>
 
@@ -35,7 +71,6 @@ const AdminViewEditC = () => {
             <FormLabel>CLASS # (All):</FormLabel>
             <Select placeholder="Select class">
               <option value="1">1</option>
-        
             </Select>
           </FormControl>
 

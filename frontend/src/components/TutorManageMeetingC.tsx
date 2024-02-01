@@ -1,72 +1,186 @@
 // TutorManageMeetingC
 
 
-import React, { useContext, useState } from 'react';
-import { Box,Flex,Table,Thead,Tbody,Tr,Th,Td,Button,Text,Container,Radio,RadioGroup,Stack } from "@chakra-ui/react";
+import React, { useContext, useEffect, useState } from 'react';
+import { Box,Flex,Table,Thead,Tbody,Tr,Th,Td,Button,Text,Container,Radio,RadioGroup,Stack, useToast } from "@chakra-ui/react";
   
 
-const TutorManageMeetingC = () => {
-    const meetings = [
-        { year: "2022 - 2023", student: "Student1", type: "Defense", dateLocation: ["04/31/2024 At school", "03/31/2024 At company", "03/31/2024 Visio"] },
-        { year: "2022 - 2023", student: "Student1", type: "visite", dateLocation: ["04/31/2024 At school", "03/31/2024 At company", "03/31/2024 Visio"] },
-        { year: "2022 - 2023", student: "Student1", type: "Defense", dateLocation: ["04/31/2024 At school", "03/31/2024 At company", "03/31/2024 Visio"] },
-        { year: "2022 - 2023", student: "Student1", type: "visite", dateLocation: ["04/31/2024 At school", "03/31/2024 At company", "03/31/2024 Visio"] },
-        { year: "2022 - 2023", student: "Student1", type: "Defense", dateLocation: ["04/31/2024 At school", "03/31/2024 At company", "03/31/2024 Visio"] },
-      ];
+interface Internship {
+    id?: number;
+    duration: number;
+    type: string;
+    jobTitle: string;
+    mission: string;
+    salary: number;
+    startDate: Date | string;
+    endDate: Date | string;
+    TutorID?: number;
+    tutorID: number;
+    meetingList: {
+        type: string;
+        date: string;
+        location: string;
+        finished: boolean;
+        deadline: "";
+    }[];
+    files: [
+        {category: 1, type: "final report", content: [], confidential: 1, finished: false, deadline: "", message: ""}, 
+        {category: 2, type: "CdC", content: [], confidential: 1, finished: false, deadline: "", message: ""},
+        {category: 3, type: "fiche visit", content: [], confidential: 0, finished: false, deadline: "", message: ""},
+        {category: 4, type: "first self-evaluation form", content: [], confidential: 0, finished: false, deadline: "", message: ""},
+        {category: 5, type: "second self-evaluation form", content: [], confidential: 0, finished: false, deadline: "", message: ""},
+        {category: 6, type: "third self-evaluation form", content: [], confidential: 0, finished: false, deadline: "", message: ""},
+        {category: 7, type: "intermediate evaluation form", content: [], confidential: 0, finished: false, deadline: "", message: ""},
+        {category: 8, type: "final evaluation form", content: [], confidential: 0, finished: false, deadline: "", message: ""},
+    ];
+    status: string;
+    student: {
+        id?: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        type: string;
+        telephone: string;
+        oldPassword: string;
+        promotion: number;
+        year: string;
+        company: {
+            name: string;
+            address: string;
+            city: string;
+            zipCode: string;
+        };
+    }[];
+};
+
+
+interface User {
+    id?: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    type: string;
+    telephone: string;
+    oldPassword: string;
+    promotion: number;
+    year: string;
+    company: {
+        name: string;
+        address: string;
+        city: string;
+        zipCode: string;
+    };
+  };
+  
+
+interface TutorManageMeetingProps {
+    meetingType: string;
+    selectedInternship: Internship;
+    onSubmissionSuccess: () => void;
+}
+
+
+
+
+const TutorManageMeetingC : React.FC<TutorManageMeetingProps> = ({ meetingType, selectedInternship, onSubmissionSuccess }) => {
+    const [user, setUser] = useState<User | null>(null);
+    const toast = useToast();
+    const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+
+
+    useEffect(() => {
+        console.log("selectedInternship: ", selectedInternship);
+    }, [selectedInternship]);
+
+    useEffect(() => {
+        console.log("Latest Tutor updated: ", user);
+    }, [user]);
+
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            console.log("TEST user.promotion: ", `${user?.promotion}`);
+            console.log("User ID from localStorage:", JSON.parse(storedUser)?.id);
+        };
+    }, []);
+
+    const meetingsOfType = selectedInternship.meetingList.filter(meeting => meeting.type === meetingType);
+
+    const validateMeeting = async (meetingIndex: number) => {
+        console.log("TEST validateMeeting's meetingIndex: ", meetingIndex);
+        console.log("TEST meetingsOfType: ", meetingsOfType);
+        console.log("TEST meetingsOfType[0]: ", meetingsOfType[0]);
+        console.log("TEST meetingsOfType[1]: ", meetingsOfType[1]);
+
+        try {
+        const response = await fetch(`${process.env.REACT_APP_BACKENDNODE_URL}/api/internship/updateMeetingStatus/${selectedInternship.id}`, {
+            method: 'PUT',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ meetingType }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update meeting status');
+        }
+
+        toast({
+            title: 'Meeting validated successfully',
+            description: `The ${meetingType} meeting has been marked as finished.`,
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+        });
+        onSubmissionSuccess(); 
+        } catch (error) {
+        toast({
+            title: 'Error validating meeting',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+        });
+        }
+    };
 
 
     return (
-        // <Flex direction="column" p={5} w="full" maxW="1200px" mx="auto">
-        //     <Text>TutorManageMeetingC</Text>
-        // </Flex>
         <Container maxW="container.2xl" p={5} mt={20}>
-            
-
             <Flex direction="column" overflowX="auto">
                 <Text fontSize="4xl" fontWeight="bold" mb={4} textAlign="center" >TUTOR SPACE</Text>
                 <Table variant="striped" colorScheme="teal" size="sm">
                 <Thead>
                     <Tr>
-                    <Th>Years</Th>
-                    <Th>Student</Th>
-                    <Th>Meeting Type</Th>
-                    <Th>Date1 + Location1</Th>
-                    <Th>Date2 + Location2</Th>
-                    <Th>Date3 + Location3</Th>
-                    <Th>Final Action</Th>
+                    <Th>Type</Th>
+                    <Th>Date</Th>
+                    <Th>Location</Th>
+                    <Th>Deadline</Th>
+                    <Th>Action</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {meetings.map((meeting, index) => (
-                    <Tr key={index}>
-                        <Td>{meeting.year}</Td>
-                        <Td>{meeting.student}</Td>
-                        <Td>{meeting.type}</Td>
-                        {meeting.dateLocation.map((dateLoc, i) => (
-                        <Td key={i}>
-                            <RadioGroup defaultValue="2">
-                            <Stack spacing={5} direction="row">
-                                <Radio colorScheme="blue" value={i.toString()}>
-                                {dateLoc}
-                                </Radio>
-                            </Stack>
-                            </RadioGroup>
-                        </Td>
-                        ))}
-                        <Td>
-                        <Button colorScheme="blue" mr={3}>Save</Button>
-                        <Button colorScheme="red">Reject all</Button>
-                        </Td>
-                    </Tr>
+
+                    {meetingsOfType.map((meeting, index) => (
+                        <Tr key={index}>
+                            <Td>{meeting.type}</Td>
+                            <Td>{meeting.date}</Td>
+                            <Td>{meeting.location}</Td>
+                            <Td>{meeting.deadline}</Td>
+                            <Td>
+                            <Button colorScheme="blue" mr={3} onClick={() => validateMeeting(index)} disabled={meeting.finished}>
+                                Validate
+                            </Button>
+                            </Td>
+                        </Tr>
                     ))}
+
                 </Tbody>
                 </Table>
-                <Flex justifyContent="center" my={4}>
-                <Button>{"<"}</Button>
-                {/* Page numbers would be rendered dynamically here */}
-                <Text mx={2}>Page 1 of 5</Text>
-                <Button>{">"}</Button>
-                </Flex>
+
             </Flex>
         </Container>
     );
